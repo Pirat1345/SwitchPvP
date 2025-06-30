@@ -3,7 +3,7 @@ A Minecraft 1.21.5 PvP minigame plugin with switchable kits
 
 # SwitchPvP - Minecraft PvP Plugin
 
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.13%2B-blue)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.5%2B-blue)
 ![License](https://img.shields.io/github/license/yourusername/SwitchPvP)
 
 A dynamic PvP plugin for Minecraft servers featuring random kits, kill streaks, and persistent leaderboards.
