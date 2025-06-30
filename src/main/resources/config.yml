@@ -1,0 +1,11 @@
+# Default configuration for SwitchPvP
+config-version: 1
+lobby: null
+arena:
+  spawns: []
+game:
+  active: false
+stats:
+  killStreaks: {}
+coreboard:
+  location: null

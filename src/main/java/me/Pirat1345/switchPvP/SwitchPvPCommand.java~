@@ -1,0 +1,196 @@
+package me.Pirat1345.switchPvP;
+
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class SwitchPvPCommand implements CommandExecutor, TabCompleter {
+    private final SwitchPvP plugin;
+    private final List<String> mainCommands = Arrays.asList(
+            "join", "leave", "set lobby", "set arena", "remove arena", "clear arenas",
+            "list arenas", "kit", "set coreboard", "remove coreboard", "reset stats",
+            "set countdown" // Add new command
+    );
+    private final List<String> kitSubCommands = Arrays.asList(
+            "create", "delete", "list"
+    );
+
+    public SwitchPvPCommand(SwitchPvP plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Only players can use this command!");
+            return true;
+        }
+
+        Player player = (Player) sender;
+
+        if (args.length == 0) {
+            player.sendMessage("§6SwitchPvP Commands:");
+            player.sendMessage("§a/switchpvp join §7- Spiel beitreten");
+            player.sendMessage("§a/switchpvp leave §7- Spiel verlassen");
+            player.sendMessage("§a/switchpvp set lobby §7- Lobby setzen");
+            player.sendMessage("§a/switchpvp set arena §7- Arena Spawn hinzufügen");
+            player.sendMessage("§a/switchpvp remove arena §7- Nächsten Spawn entfernen");
+            player.sendMessage("§a/switchpvp clear arenas §7- Alle Spawns entfernen");
+            player.sendMessage("§a/switchpvp list arenas §7- Spawns anzeigen");
+            player.sendMessage("§a/switchpvp set coreboard §7- Leaderboard erstellen");
+            player.sendMessage("§a/switchpvp remove coreboard §7- Leaderboard entfernen");
+            player.sendMessage("§a/switchpvp reset stats §7- Alle Statistiken zurücksetzen");
+            player.sendMessage("§a/switchpvp kit create <name> §7- Kit erstellen");
+            player.sendMessage("§a/switchpvp kit delete <name> §7- Kit löschen");
+            player.sendMessage("§a/switchpvp kit list §7- Kits auflisten");
+            player.sendMessage("§a/switchpvp set countdown <seconds> §7- Lobby Countdown ändern");
+            return true;
+        }
+
+        String command = String.join(" ", args).toLowerCase();
+
+        if (command.startsWith("join")) {
+            plugin.getGameManager().joinGame(player);
+        }
+        else if (command.startsWith("leave")) {
+            plugin.getGameManager().leaveGame(player);
+        }
+        else if (command.startsWith("set countdown")) {
+            if (args.length < 3) {
+                player.sendMessage("§cVerwendung: /switchpvp set countdown <sekunden>");
+                return true;
+            }
+
+            try {
+                int seconds = Integer.parseInt(args[2]);
+                if (seconds < 3 || seconds > 60) {
+                    player.sendMessage("§cCountdown muss zwischen 3 und 60 Sekunden liegen!");
+                    return true;
+                }
+
+                plugin.getGameManager().setLobbyCountdown(seconds);
+                player.sendMessage("§aLobby Countdown wurde auf " + seconds + " Sekunden gesetzt!");
+            } catch (NumberFormatException e) {
+                player.sendMessage("§cUngültige Zahl!");
+            }
+        }
+        else if (command.startsWith("set lobby")) {
+            plugin.getGameManager().setLobby(player.getLocation());
+            player.sendMessage("§aLobby-Spawn wurde gesetzt!");
+        }
+        else if (command.startsWith("set arena")) {
+            plugin.getGameManager().addArenaSpawn(player.getLocation());
+            player.sendMessage("§aArena-Spawn wurde hinzugefügt!");
+        }
+        else if (command.startsWith("remove arena")) {
+            if (plugin.getGameManager().removeNearestArenaSpawn(player.getLocation())) {
+                player.sendMessage("§aNächster Arena-Spawn wurde entfernt!");
+            } else {
+                player.sendMessage("§cKein Arena-Spawn in der Nähe gefunden!");
+            }
+        }
+        else if (command.startsWith("clear arenas")) {
+            plugin.getGameManager().clearArenaSpawns();
+            player.sendMessage("§aAlle Arena-Spawns wurden entfernt!");
+        }
+        else if (command.startsWith("list arenas")) {
+            List<Location> spawns = plugin.getGameManager().getArenaSpawns();
+            player.sendMessage("§6Arena-Spawns (" + spawns.size() + "):");
+            for (int i = 0; i < spawns.size(); i++) {
+                Location loc = spawns.get(i);
+                player.sendMessage("§7" + (i+1) + ") §eX: " + loc.getBlockX() +
+                        " Y: " + loc.getBlockY() + " Z: " + loc.getBlockZ());
+            }
+        }
+        else if (command.startsWith("set coreboard")) {
+            plugin.getGameManager().createCoreBoard(player.getLocation());
+            player.sendMessage("§aLeaderboard wurde erstellt!");
+        }
+        else if (command.startsWith("remove coreboard")) {
+            if (plugin.getGameManager().removeCoreBoard(player.getLocation())) {
+                player.sendMessage("§aLeaderboard wurde entfernt!");
+            } else {
+                if (!plugin.getGameManager().hasCoreBoard()) {
+                    player.sendMessage("§cKein Leaderboard vorhanden!");
+                } else {
+                    player.sendMessage("§cKein Leaderboard in einem Radius von 5 Blöcken gefunden!");
+                }
+            }
+        }
+        else if (command.startsWith("reset stats")) {
+            plugin.getGameManager().resetAllStats();
+            player.sendMessage("§aAlle Statistiken wurden zurückgesetzt!");
+        }
+        else if (command.startsWith("kit")) {
+            handleKitCommand(player, args);
+        }
+        else {
+            player.sendMessage("§cUnbekannter Befehl! Nutze /switchpvp für Hilfe.");
+        }
+
+
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+        List<String> completions = new ArrayList<>();
+        String current = String.join(" ", args).toLowerCase();
+
+        if (args.length == 1) {
+            for (String command : mainCommands) {
+                if (command.startsWith(current)) {
+                    completions.add(command);
+                }
+            }
+        }
+        else if (args.length >= 2 && args[0].equalsIgnoreCase("kit")) {
+            if (args.length == 2) {
+                for (String subCommand : kitSubCommands) {
+                    if (subCommand.startsWith(args[1].toLowerCase())) {
+                        completions.add(subCommand);
+                    }
+                }
+            } else if (args.length == 3 && args[1].equalsIgnoreCase("delete")) {
+                // Tab completion for kit names
+            }
+        }
+
+        return completions;
+    }
+
+    private void handleKitCommand(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage("§cVerwendung: /switchpvp kit <create|delete|list> [name]");
+            return;
+        }
+
+        switch (args[1].toLowerCase()) {
+            case "create":
+                if (args.length < 3) {
+                    player.sendMessage("§cVerwendung: /switchpvp kit create <name>");
+                    return;
+                }
+                plugin.getKitManager().createKit(player, args[2]);
+                break;
+            case "delete":
+                if (args.length < 3) {
+                    player.sendMessage("§cVerwendung: /switchpvp kit delete <name>");
+                    return;
+                }
+                plugin.getKitManager().deleteKit(player, args[2]);
+                break;
+            case "list":
+                plugin.getKitManager().listKits(player);
+                break;
+            default:
+                player.sendMessage("§cUnbekannter Kit-Befehl!");
+        }
+    }
+}
