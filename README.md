@@ -15,7 +15,7 @@ A dynamic PvP plugin for Minecraft servers featuring random kits, kill streaks, 
 - 📊 **Statistics Tracking** - Records player kills across sessions
 
 ## 🚀 Installation
-1. Download the latest `.jar` from [Releases](https://github.com/Pirat1345/SwitchPvP/releases)
+1. Download the latest `.jar` from [Releases](https://github.com/Pirat1345/SwitchPvP/releases) [Modrinth](https://modrinth.com/plugin/switch-pvp)
 2. Place in your server's `plugins` folder
 3. Restart your server
 4. Configure using the commands below
