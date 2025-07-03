@@ -47,7 +47,7 @@ The winner and the loser will receive a new random kit and can continue fighting
 You can get out with `/switchpvp leave`.
 
 ## 📹 Tutorial
-[![YouTube Video](https://img.youtube.com/vi/_upK_Z0NRxc/0.jpg)](https://www.youtube.com/watch?v=_upK_Z0NRxc)
+[![YouTube Video](https://img.youtube.com/vi/8jiEtNAJ9lY/0.jpg)](https://www.youtube.com/watch?v=8jiEtNAJ9lY)
 
 ## 📋 Commands
 
